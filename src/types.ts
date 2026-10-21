@@ -48,6 +48,7 @@ export interface ExtractedReference {
 export interface SafeFix {
   title: string;
   replacement: string;
+  expectedOriginalText: string;
   range: SourceRange;
   isSafe: boolean;
   fileUri: string;

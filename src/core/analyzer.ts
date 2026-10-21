@@ -54,6 +54,7 @@ export class ReferenceAnalyzer {
           safeFix: {
             title: `Fix this reference: Replace '${scope.rawPath}' with '${actual}'`,
             replacement: actual,
+            expectedOriginalText: scope.rawPath,
             range: scope.range,
             isSafe: true,
             fileUri
@@ -216,6 +217,7 @@ export class ReferenceAnalyzer {
         safeFix: {
           title: `Fix this reference: Replace '${ref.target}' with '${safeCorrection}'`,
           replacement: safeCorrection,
+          expectedOriginalText: ref.target,
           range: ref.range,
           isSafe: true,
           fileUri
@@ -278,6 +280,7 @@ export class ReferenceAnalyzer {
         safeFix: {
           title: `Fix this reference: Replace '${ref.target}' with '${actual}'`,
           replacement: actual,
+          expectedOriginalText: ref.target,
           range: ref.range,
           isSafe: true,
           fileUri

@@ -36,6 +36,7 @@ describe('Bulk Actions Execution & Review Dialog', () => {
       safeFix: {
         title: "Replace 'buid' with 'build'",
         replacement: 'build',
+        expectedOriginalText: 'buid',
         range: { startLine: 0, startCol: 8, endLine: 0, endCol: 12, offsetStart: 8, offsetEnd: 12 },
         isSafe: true,
         fileUri: uri.toString()
@@ -78,6 +79,7 @@ describe('Bulk Actions Execution & Review Dialog', () => {
       safeFix: {
         title: "Replace 'buid' with 'build'",
         replacement: 'build',
+        expectedOriginalText: 'buid',
         range: { startLine: 0, startCol: 8, endLine: 0, endCol: 12, offsetStart: 8, offsetEnd: 12 },
         isSafe: true,
         fileUri: uri.toString()
@@ -131,6 +133,7 @@ describe('Bulk Actions Execution & Review Dialog', () => {
       safeFix: {
         title: "Replace 'buid' with 'build'",
         replacement: 'build',
+        expectedOriginalText: 'buid',
         range: { startLine: 0, startCol: 8, endLine: 0, endCol: 12, offsetStart: 8, offsetEnd: 12 },
         isSafe: true,
         fileUri: uri.toString()

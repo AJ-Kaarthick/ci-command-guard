@@ -3,7 +3,8 @@ import { globalState } from './lifecycle/state';
 import { isWorkflowUri, WorkflowScanner } from './lifecycle/scanner';
 import { LifecycleWatcher } from './lifecycle/watcher';
 import { CiCommandGuardCodeActionProvider } from './providers/codeActionProvider';
-import { executeFixAllInFile, executeFixAllInWorkspace } from './bulk/bulkActions';
+import { executeApplySingleFix, executeFixAllInFile, executeFixAllInWorkspace } from './bulk/bulkActions';
+import { SafeFix } from './types';
 
 let scanner: WorkflowScanner | undefined;
 let watcher: LifecycleWatcher | undefined;
@@ -90,6 +91,17 @@ export async function activate(context: vscode.ExtensionContext) {
         }
       });
     })
+  );
+
+  // Command: Apply Single Safe Fix
+  context.subscriptions.push(
+    vscode.commands.registerCommand(
+      'ci-command-guard.applySingleFix',
+      async (fileUri: vscode.Uri, safeFix: SafeFix) => {
+        if (!fileUri || !safeFix) return;
+        await executeApplySingleFix(fileUri, safeFix, scanner);
+      }
+    )
   );
 
   // Command 4: Fix All Safe Issues in Workspace

@@ -24,22 +24,33 @@ export class CiCommandGuardCodeActionProvider implements vscode.CodeActionProvid
 
     for (const diag of guardDiagnostics) {
       if (diag.safeFix && diag.safeFix.isSafe) {
-        const singleAction = new vscode.CodeAction(
-          diag.safeFix.title,
-          vscode.CodeActionKind.QuickFix
-        );
-        singleAction.diagnostics = [diag];
-        singleAction.isPreferred = true;
-
-        const edit = new vscode.WorkspaceEdit();
         const fixRange = new vscode.Range(
           diag.safeFix.range.startLine,
           diag.safeFix.range.startCol,
           diag.safeFix.range.endLine,
           diag.safeFix.range.endCol
         );
-        edit.replace(document.uri, fixRange, diag.safeFix.replacement);
-        singleAction.edit = edit;
+
+        // Do not expose stale fixes if document content at range no longer matches expected text
+        const currentText = document.getText(fixRange);
+        if (
+          diag.safeFix.expectedOriginalText !== undefined &&
+          currentText !== diag.safeFix.expectedOriginalText
+        ) {
+          continue;
+        }
+
+        const singleAction = new vscode.CodeAction(
+          diag.safeFix.title,
+          vscode.CodeActionKind.QuickFix
+        );
+        singleAction.diagnostics = [diag];
+        singleAction.isPreferred = true;
+        singleAction.command = {
+          command: 'ci-command-guard.applySingleFix',
+          title: diag.safeFix.title,
+          arguments: [document.uri, diag.safeFix]
+        };
 
         actions.push(singleAction);
       }

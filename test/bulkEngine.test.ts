@@ -35,6 +35,7 @@ jobs:
       {
         title: "Replace 'buid' with 'build'",
         replacement: 'build',
+        expectedOriginalText: 'buid',
         range: {
           startLine: 5,
           startCol: 17,
@@ -49,6 +50,7 @@ jobs:
       {
         title: "Replace 'tets' with 'test'",
         replacement: 'test',
+        expectedOriginalText: 'tets',
         range: {
           startLine: 6,
           startCol: 17,
@@ -93,6 +95,7 @@ jobs:
       {
         title: "Replace 'buid' with 'build'",
         replacement: 'build',
+        expectedOriginalText: 'buid',
         range: {
           startLine: 0,
           startCol: 13,
@@ -107,6 +110,7 @@ jobs:
       {
         title: "Replace 'depploy' with 'deploy'",
         replacement: 'deploy',
+        expectedOriginalText: 'depploy',
         range: {
           startLine: 0,
           startCol: 13,
@@ -143,13 +147,14 @@ jobs:
       {
         title: 'Fix 1',
         replacement: 'test',
+        expectedOriginalText: 'test-buil',
         range: {
           startLine: 0,
           startCol: 8,
           endLine: 0,
-          endCol: 18,
+          endCol: 17,
           offsetStart: 8,
-          offsetEnd: 18
+          offsetEnd: 17
         },
         isSafe: true,
         fileUri: 'file:///ci.yml'
@@ -157,6 +162,7 @@ jobs:
       {
         title: 'Fix 2',
         replacement: 'build',
+        expectedOriginalText: 'build',
         range: {
           startLine: 0,
           startCol: 13,
@@ -186,6 +192,7 @@ jobs:
       {
         title: 'Stale Fix',
         replacement: 'build',
+        expectedOriginalText: 'build',
         range: {
           startLine: 0,
           startCol: 10,

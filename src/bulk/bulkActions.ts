@@ -1,9 +1,80 @@
 import * as vscode from 'vscode';
 import { DiagnosticState, globalState } from '../lifecycle/state';
 import { computeBulkEditPlan, DocumentInput } from './bulkEngine';
+import { SafeFix } from '../types';
 
 export interface BulkActionCallbacks {
   onApplied?: () => Promise<void>;
+}
+
+export interface ScannerLike {
+  scanDocument(document: vscode.TextDocument): Promise<void>;
+  scanWorkspace?(): Promise<number>;
+}
+
+/**
+ * Executes a single-reference fix after strictly validating the current document state.
+ * If validation fails (stale fix, text mismatch, or shifted ranges), it rescans and notifies the user to retry.
+ */
+export async function executeApplySingleFix(
+  fileUri: vscode.Uri,
+  safeFix: SafeFix,
+  scanner?: ScannerLike
+): Promise<boolean> {
+  let doc: vscode.TextDocument;
+  try {
+    doc = await vscode.workspace.openTextDocument(fileUri);
+  } catch (err: any) {
+    vscode.window.showErrorMessage(`CI Command Guard: Could not read document '${fileUri.fsPath}': ${err.message}`);
+    return false;
+  }
+
+  const fixRange = new vscode.Range(
+    safeFix.range.startLine,
+    safeFix.range.startCol,
+    safeFix.range.endLine,
+    safeFix.range.endCol
+  );
+
+  const docContent = doc.getText();
+  const currentRangeText = doc.getText(fixRange);
+
+  let isOffsetValid = true;
+  if (
+    safeFix.range.offsetStart < 0 ||
+    safeFix.range.offsetEnd > docContent.length ||
+    safeFix.range.offsetStart > safeFix.range.offsetEnd
+  ) {
+    isOffsetValid = false;
+  } else {
+    const offsetSlice = docContent.slice(safeFix.range.offsetStart, safeFix.range.offsetEnd);
+    if (safeFix.expectedOriginalText !== undefined && offsetSlice !== safeFix.expectedOriginalText) {
+      isOffsetValid = false;
+    }
+  }
+
+  const isRangeTextValid =
+    safeFix.expectedOriginalText === undefined || currentRangeText === safeFix.expectedOriginalText;
+
+  if (!isOffsetValid || !isRangeTextValid) {
+    // Stale fix: trigger rescan and notify user
+    if (scanner) {
+      await scanner.scanDocument(doc);
+    }
+    vscode.window.showWarningMessage(
+      'CI Command Guard: The reference at this location has changed or the fix is stale. Rescanned workflow; please retry.'
+    );
+    return false;
+  }
+
+  const edit = new vscode.WorkspaceEdit();
+  edit.replace(fileUri, fixRange, safeFix.replacement);
+  const applied = await vscode.workspace.applyEdit(edit);
+
+  if (applied && scanner) {
+    await scanner.scanDocument(doc);
+  }
+  return applied;
 }
 
 export async function executeFixAllInFile(
@@ -50,11 +121,28 @@ export async function executeFixAllInFile(
     return false; // Cancel leaves file completely unchanged
   }
 
-  // Verify document version hasn't changed while modal was open
+  // Re-read document to verify version and content hasn't changed while modal was open
+  try {
+    doc = await vscode.workspace.openTextDocument(fileUri);
+  } catch (err: any) {
+    vscode.window.showErrorMessage(`CI Command Guard: Could not re-open document '${fileUri.fsPath}': ${err.message}`);
+    return false;
+  }
+
   if (doc.version !== docInput.version) {
     vscode.window.showErrorMessage(
       `CI Command Guard: Aborted bulk fix because '${fileUri.fsPath}' was modified while reviewing. No changes were applied.`
     );
+    return false;
+  }
+
+  // Re-verify plan against latest content
+  const preApplyPlan = computeBulkEditPlan(
+    [{ fileUri: fileUri.toString(), content: doc.getText(), version: doc.version }],
+    fixes
+  );
+  if (!preApplyPlan.valid) {
+    vscode.window.showErrorMessage(`CI Command Guard: ${preApplyPlan.errorMessage}`);
     return false;
   }
 
@@ -129,15 +217,37 @@ export async function executeFixAllInWorkspace(
     return false; // Cancel leaves every file completely unchanged
   }
 
-  // Verify all document versions are still unchanged
-  for (const docInput of docInputs) {
-    const doc = openDocs.get(docInput.fileUri);
-    if (!doc || doc.version !== docInput.version) {
+  // Re-read all documents and verify versions and contents before applying anything
+  const freshDocInputs: DocumentInput[] = [];
+  for (const uriStr of fileUriStrings) {
+    try {
+      const uri = vscode.Uri.parse(uriStr);
+      const freshDoc = await vscode.workspace.openTextDocument(uri);
+      const initialDoc = openDocs.get(uriStr);
+      if (!initialDoc || freshDoc.version !== initialDoc.version) {
+        vscode.window.showErrorMessage(
+          `CI Command Guard: Aborted workspace fix because document '${uriStr}' was modified while reviewing. No changes were applied.`
+        );
+        return false;
+      }
+      freshDocInputs.push({
+        fileUri: uriStr,
+        content: freshDoc.getText(),
+        version: freshDoc.version
+      });
+    } catch (err: any) {
       vscode.window.showErrorMessage(
-        `CI Command Guard: Aborted workspace fix because document '${docInput.fileUri}' was modified while reviewing. No changes were applied.`
+        `CI Command Guard: Aborted workspace fix because document '${uriStr}' could not be re-opened: ${err.message}. No changes were applied.`
       );
       return false;
     }
+  }
+
+  // Re-verify the complete plan against fresh contents
+  const preApplyPlan = computeBulkEditPlan(freshDocInputs, fixes);
+  if (!preApplyPlan.valid) {
+    vscode.window.showErrorMessage(`CI Command Guard: ${preApplyPlan.errorMessage}`);
+    return false;
   }
 
   const edit = new vscode.WorkspaceEdit();

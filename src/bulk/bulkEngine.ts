@@ -107,6 +107,17 @@ export function computeBulkEditPlan(
       }
 
       const existingSlice = workingContent.slice(start, end);
+
+      if (fix.expectedOriginalText !== undefined && existingSlice !== fix.expectedOriginalText) {
+        return {
+          valid: false,
+          errorMessage: `Validation failed: Stale fix for '${fileUri}' at line ${fix.range.startLine + 1}, col ${fix.range.startCol + 1}. Expected '${fix.expectedOriginalText}', but found '${existingSlice}'. Operation aborted.`,
+          totalFixes: 0,
+          affectedFiles: [],
+          detailedSummary: ''
+        };
+      }
+
       // Construct replacement
       workingContent = workingContent.slice(0, start) + fix.replacement + workingContent.slice(end);
 
