@@ -1,0 +1,15 @@
+{
+  "name": "fixture-root",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build": "echo 'building root'",
+    "test:unit": "echo 'running unit tests'",
+    "lint": "echo 'linting'",
+    "typecheck": "echo 'checking types'",
+    "deploy": "echo 'deploying'",
+    "test": "echo 'test'",
+    "rest": "echo 'rest'",
+    "best": "echo 'best'"
+  }
+}

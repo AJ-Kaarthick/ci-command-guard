@@ -73,7 +73,7 @@
     "build:dev": "esbuild ./src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node --sourcemap",
     "typecheck": "tsc --noEmit",
     "test": "mocha -r ts-node/register -r ./test/setup.ts 'test/**/*.test.ts' --timeout 10000",
-    "package": "vsce package"
+    "package": "vsce package --no-dependencies"
   },
   "dependencies": {
     "yaml": "^2.4.5"

@@ -1,0 +1,14 @@
+name: Bulk Fix Target
+on: [push]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Safe fix 1 (buid -> build)
+        run: npm run buid
+      - name: Safe fix 2 (tst:unit -> test:unit)
+        run: npm run tst:unit
+      - name: Safe fix 3 (scripts/Build.js -> scripts/build.js)
+        run: node scripts/Build.js

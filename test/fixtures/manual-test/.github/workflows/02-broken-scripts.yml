@@ -1,0 +1,12 @@
+name: Broken Scripts
+on: [push]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Safe typo (buid -> build)
+        run: npm run buid
+      - name: Ambiguous script (pest -> test, rest, best - must NOT auto-fix)
+        run: npm run pest

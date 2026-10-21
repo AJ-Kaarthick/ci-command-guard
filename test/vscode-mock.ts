@@ -110,17 +110,74 @@ export class CodeAction {
   constructor(public title: string, public kind?: CodeActionKind) {}
 }
 
+export class DiagnosticCollection {
+  private map = new Map<string, Diagnostic[]>();
+
+  constructor(public name: string) {}
+
+  set(uri: Uri, diagnostics: Diagnostic[]): void {
+    this.map.set(uri.toString(), diagnostics);
+  }
+
+  get(uri: Uri): Diagnostic[] | undefined {
+    return this.map.get(uri.toString());
+  }
+
+  delete(uri: Uri): void {
+    this.map.delete(uri.toString());
+  }
+
+  clear(): void {
+    this.map.clear();
+  }
+
+  dispose(): void {
+    this.clear();
+  }
+}
+
+export interface FileSystemWatcher {
+  onDidCreate(listener: (e: Uri) => any): { dispose(): void };
+  onDidChange(listener: (e: Uri) => any): { dispose(): void };
+  onDidDelete(listener: (e: Uri) => any): { dispose(): void };
+  dispose(): void;
+}
+
 export const workspace = {
+  workspaceFolders: [] as { uri: Uri; name: string; index: number }[] | undefined,
+  getWorkspaceFolder: (uri: Uri) => {
+    return workspace.workspaceFolders?.[0];
+  },
   applyEdit: async (edit: WorkspaceEdit): Promise<boolean> => true,
   openTextDocument: async (uri: Uri) => ({
     uri,
     version: 1,
-    getText: () => ''
+    getText: () => '',
+    fsPath: uri.fsPath
+  }),
+  onDidChangeTextDocument: (listener: (e: any) => any) => ({ dispose: () => {} }),
+  onDidOpenTextDocument: (listener: (e: any) => any) => ({ dispose: () => {} }),
+  onDidCloseTextDocument: (listener: (e: any) => any) => ({ dispose: () => {} }),
+  createFileSystemWatcher: (pattern: string): FileSystemWatcher => ({
+    onDidCreate: () => ({ dispose: () => {} }),
+    onDidChange: () => ({ dispose: () => {} }),
+    onDidDelete: () => ({ dispose: () => {} }),
+    dispose: () => {}
   })
 };
 
 export const window = {
-  showInformationMessage: async () => {},
-  showWarningMessage: async () => {},
-  showErrorMessage: async () => {}
+  activeTextEditor: undefined as { document: { uri: Uri; getText(): string } } | undefined,
+  showInformationMessage: async (msg: string, ...args: any[]): Promise<any> => {},
+  showWarningMessage: async (msg: string, ...args: any[]): Promise<any> => {},
+  showErrorMessage: async (msg: string, ...args: any[]): Promise<any> => {}
+};
+
+export const languages = {
+  createDiagnosticCollection: (name: string) => new DiagnosticCollection(name),
+  registerCodeActionsProvider: (selector: any, provider: any, metadata?: any) => ({ dispose: () => {} })
+};
+
+export const commands = {
+  registerCommand: (command: string, callback: (...args: any[]) => any) => ({ dispose: () => {} })
 };

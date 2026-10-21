@@ -9,3 +9,5 @@ tsconfig.json
 *.tsbuildinfo
 test/fixtures/**
 package-lock.json
+node_modules/**
+

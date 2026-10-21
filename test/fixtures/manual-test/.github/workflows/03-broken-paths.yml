@@ -1,0 +1,12 @@
+name: Broken Paths
+on: [push]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Case mismatch path (scripts/Build.js -> scripts/build.js)
+        run: node scripts/Build.js
+      - name: Missing file (no auto-fix)
+        run: bash scripts/missing-tool.sh

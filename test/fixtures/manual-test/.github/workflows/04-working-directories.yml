@@ -1,0 +1,14 @@
+name: Working Directories
+on: [push]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Case mismatch working-directory (packages/Frontend -> packages/frontend)
+        working-directory: packages/Frontend
+        run: echo "Testing case mismatch"
+      - name: Missing directory (no auto-fix)
+        working-directory: non-existent-directory
+        run: echo "Testing missing dir"

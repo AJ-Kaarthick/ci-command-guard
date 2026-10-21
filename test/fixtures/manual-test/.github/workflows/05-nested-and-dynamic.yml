@@ -1,0 +1,15 @@
+name: Nested and Dynamic
+on: [push]
+
+jobs:
+  nested:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Valid nested script
+        working-directory: packages/frontend
+        run: npm run build
+      - name: Dynamic matrix expression (must be ignored)
+        run: npm run ${{ matrix.script }}
+      - name: Dynamic env variable (must be ignored)
+        run: npm run $CUSTOM_SCRIPT
