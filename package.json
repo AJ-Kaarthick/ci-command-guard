@@ -1,0 +1,90 @@
+{
+  "name": "ci-command-guard",
+  "displayName": "CI Command Guard",
+  "description": "Catch broken GitHub Actions command and path references before CI runs.",
+  "version": "1.0.0",
+  "type": "commonjs",
+  "publisher": "ajkaarthick",
+  "author": {
+    "name": "AJ Kaarthick"
+  },
+  "license": "MIT",
+  "homepage": "https://github.com/AJ-Kaarthick/ci-command-guard#readme",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/AJ-Kaarthick/ci-command-guard.git"
+  },
+  "bugs": {
+    "url": "https://github.com/AJ-Kaarthick/ci-command-guard/issues"
+  },
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Linters",
+    "Programming Languages"
+  ],
+  "keywords": [
+    "github-actions",
+    "ci",
+    "workflow",
+    "npm-scripts",
+    "linter",
+    "devops"
+  ],
+  "activationEvents": [
+    "workspaceContains:.github/workflows/*.yml",
+    "workspaceContains:.github/workflows/*.yaml",
+    "workspaceContains:.github/workflows/**/*.yml",
+    "workspaceContains:.github/workflows/**/*.yaml",
+    "onLanguage:github-actions-workflow",
+    "onLanguage:yaml"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "ci-command-guard.scanCurrentFile",
+        "title": "CI Command Guard: Scan Current File",
+        "category": "CI Command Guard"
+      },
+      {
+        "command": "ci-command-guard.scanWorkspace",
+        "title": "CI Command Guard: Scan Workspace",
+        "category": "CI Command Guard"
+      },
+      {
+        "command": "ci-command-guard.fixAllInFile",
+        "title": "CI Command Guard: Fix All Safe Issues in Current Workflow",
+        "category": "CI Command Guard"
+      },
+      {
+        "command": "ci-command-guard.fixAllInWorkspace",
+        "title": "CI Command Guard: Fix All Safe Issues in Workspace",
+        "category": "CI Command Guard"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run build",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "build": "esbuild ./src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node --minify",
+    "build:dev": "esbuild ./src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node --sourcemap",
+    "typecheck": "tsc --noEmit",
+    "test": "mocha -r ts-node/register 'test/**/*.test.ts' --timeout 10000",
+    "package": "vsce package"
+  },
+  "dependencies": {
+    "yaml": "^2.4.5"
+  },
+  "devDependencies": {
+    "@types/mocha": "^10.0.6",
+    "@types/node": "^20.14.0",
+    "@types/vscode": "^1.85.0",
+    "esbuild": "^0.21.4",
+    "mocha": "^10.4.0",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.4.5"
+  }
+}
