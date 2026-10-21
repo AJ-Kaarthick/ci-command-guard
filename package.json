@@ -72,7 +72,7 @@
     "build": "esbuild ./src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node --minify",
     "build:dev": "esbuild ./src/extension.ts --bundle --outfile=dist/extension.js --external:vscode --format=cjs --platform=node --sourcemap",
     "typecheck": "tsc --noEmit",
-    "test": "mocha -r ts-node/register 'test/**/*.test.ts' --timeout 10000",
+    "test": "mocha -r ts-node/register -r ./test/setup.ts 'test/**/*.test.ts' --timeout 10000",
     "package": "vsce package"
   },
   "dependencies": {

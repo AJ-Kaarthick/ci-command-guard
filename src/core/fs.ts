@@ -3,7 +3,6 @@ import * as path from 'node:path';
 import { IFileSystem } from '../types';
 
 export function normalizePath(p: string): string {
-  // Normalize Windows backslashes to forward slashes and resolve '.' and '..'
   return p.replace(/\\/g, '/');
 }
 
@@ -97,14 +96,25 @@ export class NodeFileSystem implements IFileSystem {
 export class MemoryFileSystem implements IFileSystem {
   private files = new Map<string, string>();
   private dirs = new Set<string>();
+  private baseDir: string;
 
-  constructor() {
-    this.dirs.add('/');
+  constructor(baseDir: string = '.') {
+    this.baseDir = normalizePath(path.resolve(baseDir));
+    this.dirs.add('');
     this.dirs.add('.');
   }
 
   private cleanPath(p: string): string {
     let normalized = normalizePath(p);
+    if (path.isAbsolute(normalized)) {
+      normalized = normalizePath(path.resolve(normalized));
+    }
+    if (this.baseDir && normalized.startsWith(this.baseDir)) {
+      normalized = normalized.slice(this.baseDir.length);
+    }
+    while (normalized.startsWith('/')) {
+      normalized = normalized.slice(1);
+    }
     if (normalized.startsWith('./')) {
       normalized = normalized.slice(2);
     }
@@ -150,7 +160,7 @@ export class MemoryFileSystem implements IFileSystem {
     const clean = this.cleanPath(pathOrUri);
     const content = this.files.get(clean);
     if (content === undefined) {
-      throw new Error(`File not found: ${pathOrUri}`);
+      throw new Error(`File not found: ${pathOrUri} (cleaned: ${clean})`);
     }
     return content;
   }
@@ -164,14 +174,17 @@ export class MemoryFileSystem implements IFileSystem {
       if (prefix ? file.startsWith(prefix) : true) {
         const remainder = prefix ? file.slice(prefix.length) : file;
         const firstSegment = remainder.split('/')[0];
-        if (firstSegment) {
+        if (firstSegment && firstSegment !== file) {
+          // If remainder has no slashes, firstSegment is the file name
+          entries.add(firstSegment);
+        } else if (firstSegment) {
           entries.add(firstSegment);
         }
       }
     }
 
     for (const dir of this.dirs) {
-      if (dir === clean || !dir) continue;
+      if (!dir || dir === '.' || dir === clean) continue;
       if (prefix ? dir.startsWith(prefix) : true) {
         const remainder = prefix ? dir.slice(prefix.length) : dir;
         const firstSegment = remainder.split('/')[0];
@@ -205,7 +218,6 @@ export function matchSimplePattern(filePath: string, pattern: string): boolean {
   const normPath = normalizePath(filePath);
   const normPattern = normalizePath(pattern);
 
-  // Convert pattern to regex
   const regexStr = '^' + normPattern
     .replace(/[.+^${}()|[\]\\]/g, '\\$&')
     .replace(/\*\*\/\*/g, '.*')
