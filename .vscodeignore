@@ -10,4 +10,5 @@ tsconfig.json
 test/fixtures/**
 package-lock.json
 node_modules/**
+media/*.py
 

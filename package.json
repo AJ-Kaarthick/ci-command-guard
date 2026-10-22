@@ -3,6 +3,7 @@
   "displayName": "CI Command Guard",
   "description": "Catch broken GitHub Actions command and path references before CI runs.",
   "version": "1.0.0",
+  "icon": "media/icon.png",
   "type": "commonjs",
   "publisher": "ajkaarthick",
   "author": {

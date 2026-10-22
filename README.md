@@ -1,12 +1,20 @@
 # CI Command Guard
 
+<p align="center">
+  <img src="media/icon.png" alt="CI Command Guard Icon" width="128" height="128" />
+</p>
+
 **Catch broken GitHub Actions command and path references before CI runs.**
 
 A lightweight, deterministic developer tool for Visual Studio Code that statically validates script invocations, package scripts, working directories, and local file references in `.github/workflows/**/*.{yml,yaml}` files against your repository.
 
 ---
 
-## The Problem
+## Overview
+
+![CI Command Guard Overview](media/overview.png)
+
+### The Problem
 
 Developers frequently push commits only to wait several minutes for GitHub Actions runners to start, fail on a simple typo in an `npm run` script name, an uncommitted local helper script, or a mismatched `working-directory` path, and repeat the cycle.
 
@@ -58,8 +66,8 @@ Validates static local file invocations in `run:` steps:
 - **Context Resolution**: Resolves paths relative to the step's effective working directory.
 - **Case Correction**: Flags case-only mismatches and offers safe corrections.
 
-### 4. Intentional Exclusions (Zero False Positives)
-To preserve developer trust, CI Command Guard explicitly ignores:
+### 4. Intentional Exclusions & Conservative Analysis
+To preserve developer trust and maintain conservative, high-precision detection, CI Command Guard explicitly ignores:
 - Remote action references in `uses:` (e.g., `actions/checkout@v4`).
 - GitHub Actions expressions (e.g., `${{ matrix.script }}` or `${{ env.PATH }}`).
 - Shell environment variables (e.g., `$CUSTOM_SCRIPT`, `${SCRIPT_NAME}`).
@@ -72,6 +80,8 @@ To preserve developer trust, CI Command Guard explicitly ignores:
 ---
 
 ## User Experience
+
+![Editor Diagnostics and Quick Fixes](media/quick-fix-preview.png)
 
 ### Native Diagnostics
 Findings appear natively in the **Problems panel** (`Ctrl+Shift+M` / `Cmd+Shift+M`) with squiggles highlighting the exact target token.
@@ -92,10 +102,13 @@ Placing the cursor on a diagnostic and pressing `Ctrl+.` (or `Cmd+.` on macOS) d
 *Note: If an issue is ambiguous or requires manual file creation, no misleading automatic fix is offered for that specific finding, although wider bulk options remain available for other safe issues.*
 
 ### Bulk Fix Review & Safety Guarantee
+
+![Bulk Review Confirmation Modal](media/bulk-review-preview.png)
+
 Before any multi-edit or workspace-wide change is applied:
-- A review modal presents an exact breakdown of proposed changes per file.
-- Clicking **Cancel** leaves every file completely unchanged.
-- Document versions and character offsets are validated prior to execution. If a file was modified while the review was open, the entire operation safely aborts before applying anything.
+- A clean native modal review dialog presents an exact breakdown of proposed changes per file.
+- Exactly one native **Cancel** button (or dismissing the modal via `Esc`) leaves every file completely unchanged.
+- **Stale-Fix Protection**: Document versions, expected original text tokens, and character offsets are validated prior to execution. If any file was modified while the review was open, the entire operation safely aborts before applying changes, protecting against corrupted edits.
 - All applied edits use native VS Code `WorkspaceEdit`, allowing full Undo (`Ctrl+Z`).
 
 ---
@@ -136,7 +149,7 @@ npm run build
 ```
 
 ### Automated Tests
-Run the comprehensive test suite (45 unit tests covering parser, shell tokenizer, analyzer, typo similarity, diagnostics, bulk engine, and lifecycle):
+Run the comprehensive test suite (52 automated tests covering parser, shell tokenizer, analyzer, typo similarity, diagnostics, bulk engine, lifecycle, and stale-fix regression protection):
 ```bash
 npm test
 ```
@@ -153,6 +166,14 @@ Run the self-contained QA setup script to prepare an isolated verification sandb
 ./test/fixtures/manual-test/setup-qa.sh
 code /tmp/ci-command-guard-qa
 ```
+
+---
+
+## Support & Feedback
+
+If you discover an issue, have a feature request, or need assistance:
+- Check out the [Support Guide](SUPPORT.md).
+- File an issue on our [GitHub Issues Tracker](https://github.com/AJ-Kaarthick/ci-command-guard/issues).
 
 ---
 
