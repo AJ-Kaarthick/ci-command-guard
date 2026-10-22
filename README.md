@@ -12,7 +12,8 @@ A lightweight, deterministic developer tool for Visual Studio Code that statical
 
 ## Overview
 
-![CI Command Guard Overview](media/overview.png)
+![Overview diagram comparing local validation against remote CI failure cycles](media/overview.png)
+*Illustrative preview: Pre-commit local verification vs. remote CI failure loops.*
 
 ### The Problem
 
@@ -81,7 +82,8 @@ To preserve developer trust and maintain conservative, high-precision detection,
 
 ## User Experience
 
-![Editor Diagnostics and Quick Fixes](media/quick-fix-preview.png)
+![Illustrative preview of editor squiggles, diagnostic hover card, and Quick Fix options](media/quick-fix-preview.png)
+*Illustrative preview: In-editor diagnostics, rich hover card, and Quick Fix menu.*
 
 ### Native Diagnostics
 Findings appear natively in the **Problems panel** (`Ctrl+Shift+M` / `Cmd+Shift+M`) with squiggles highlighting the exact target token.
@@ -103,7 +105,8 @@ Placing the cursor on a diagnostic and pressing `Ctrl+.` (or `Cmd+.` on macOS) d
 
 ### Bulk Fix Review & Safety Guarantee
 
-![Bulk Review Confirmation Modal](media/bulk-review-preview.png)
+![Illustrative preview of the bulk fix review confirmation modal](media/bulk-review-preview.png)
+*Illustrative preview: Native modal review dialog detailing proposed modifications per file.*
 
 Before any multi-edit or workspace-wide change is applied:
 - A clean native modal review dialog presents an exact breakdown of proposed changes per file.
