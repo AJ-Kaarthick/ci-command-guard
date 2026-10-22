@@ -108,17 +108,16 @@ export async function executeFixAllInFile(
     return false;
   }
 
-  // Show interactive modal review
+  // Show interactive modal review (VS Code automatically renders a native Cancel button for modal dialogs)
   const prompt = `CI Command Guard: Review proposed changes (${plan.totalFixes} safe fix${plan.totalFixes === 1 ? '' : 'es'} in current workflow)`;
   const action = await vscode.window.showInformationMessage(
     prompt,
     { modal: true, detail: plan.detailedSummary },
-    'Apply Changes',
-    'Cancel'
+    'Apply Changes'
   );
 
   if (action !== 'Apply Changes') {
-    return false; // Cancel leaves file completely unchanged
+    return false; // Native Cancel or dismiss leaves file completely unchanged
   }
 
   // Re-read document to verify version and content hasn't changed while modal was open
@@ -204,17 +203,16 @@ export async function executeFixAllInWorkspace(
     return false;
   }
 
-  // Show interactive modal review
+  // Show interactive modal review (VS Code automatically renders a native Cancel button for modal dialogs)
   const prompt = `CI Command Guard: Review proposed changes (${plan.totalFixes} safe fix${plan.totalFixes === 1 ? '' : 'es'} across ${plan.affectedFiles.length} file${plan.affectedFiles.length === 1 ? '' : 's'})`;
   const action = await vscode.window.showInformationMessage(
     prompt,
     { modal: true, detail: plan.detailedSummary },
-    'Apply Changes',
-    'Cancel'
+    'Apply Changes'
   );
 
   if (action !== 'Apply Changes') {
-    return false; // Cancel leaves every file completely unchanged
+    return false; // Native Cancel or dismiss leaves every file completely unchanged
   }
 
   // Re-read all documents and verify versions and contents before applying anything
